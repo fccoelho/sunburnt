@@ -1,13 +1,13 @@
-from __future__ import absolute_import
 
-import cStringIO as StringIO
+
+import io as StringIO
 from itertools import islice
-import time, urllib, urlparse
+import time, urllib.request, urllib.parse, urllib.error, urllib.parse
 import warnings
 
-from .http import ConnectionError, wrap_http_connection
-from .schema import SolrSchema, SolrError
-from .search import LuceneQuery, MltSolrSearch, SolrSearch, params_from_dict
+from httpsb import ConnectionError, wrap_http_connection
+from schema import SolrSchema, SolrError
+from search import LuceneQuery, MltSolrSearch, SolrSearch, params_from_dict
 
 MAX_LENGTH_GET_URL = 2048
 # Jetty default is 4096; Tomcat default is 8192; picking 2048 to be conservative.
@@ -97,7 +97,7 @@ class SolrConnection(object):
         if 'maxSegments' in extra_params and 'optimize' not in extra_params:
             raise ValueError("Can't do maxSegments without optimize")
         if extra_params:
-            return "%s?%s" % (self.update_url, urllib.urlencode(sorted(extra_params.items())))
+            return "%s?%s" % (self.update_url, urllib.parse.urlencode(sorted(extra_params.items())))
         else:
             return self.update_url
 
@@ -106,7 +106,7 @@ class SolrConnection(object):
             raise TypeError("This Solr instance is only for writing")
         if self.format == 'json':
             params.append(('wt', 'json'))
-        qs = urllib.urlencode(params)
+        qs = urllib.parse.urlencode(params)
         url = "%s?%s" % (self.select_url, qs)
         if len(url) > self.max_length_get_url:
             warnings.warn("Long query URL encountered - POSTing instead of "
@@ -130,14 +130,14 @@ class SolrConnection(object):
         """
         if not self.readable:
             raise TypeError("This Solr instance is only for writing")
-        qs = urllib.urlencode(params)
+        qs = urllib.parse.urlencode(params)
         base_url = "%s?%s" % (self.mlt_url, qs)
         method = 'GET'
         kwargs = {}
         if content is None:
             url = base_url
         else:
-            get_url = "%s&stream.body=%s" % (base_url, urllib.quote_plus(content))
+            get_url = "%s&stream.body=%s" % (base_url, urllib.parse.quote_plus(content))
             if len(get_url) <= self.max_length_get_url:
                 url = get_url
             else:
@@ -170,7 +170,7 @@ class SolrInterface(object):
             schemadoc = self.schemadoc
         else:
             response = self.conn.request('GET',
-                urlparse.urljoin(self.conn.url, self.remote_schema_file))
+                urllib.parse.urljoin(self.conn.url, self.remote_schema_file))
             if response.status_code != 200:
                 raise EnvironmentError("Couldn't retrieve schema document from server - received status code %s\n%s" % (response.status_code, response.content))
             schemadoc = StringIO.StringIO(response.content)

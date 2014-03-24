@@ -1,7 +1,7 @@
 
 
-from .strings import RawString
-from .sunburnt import SolrError, SolrInterface
+from strings import RawString
+from sunburnt import SolrError, SolrInterface
 
 __version__ = '0.7'
 

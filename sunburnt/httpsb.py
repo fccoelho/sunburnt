@@ -1,14 +1,15 @@
 import socket
+import requests
 
-try:
-    import requests
-    httplib2 = None
-except ImportError:
-    requests = None
-    try:
-        import httplib2
-    except ImportError:
-        raise ImportError('No module named requests or httplib2')
+# try:
+#     import requests
+#     httplib2 = None
+# except ImportError:
+#     requests = None
+#     try:
+#         import httplib2
+#     except ImportError:
+#         raise ImportError('No module named requests or httplib2')
 
 
 ConnectionError = requests.exceptions.ConnectionError if requests else socket.error
